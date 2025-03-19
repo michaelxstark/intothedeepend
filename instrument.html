@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Into the Deep End</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.js"></script>
+    <!-- Replace p5.sound with Tone.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: white;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Futura', sans-serif;
+        }
+
+        /* Home Button */
+        .back-button {
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border: 2px solid black;
+            border-radius: 50%;
+            display: block;
+            text-decoration: none;
+            margin-top: 5%;
+            margin-bottom: 5px; /* Space between button and canvas */
+        }
+
+        /* Center Canvas */
+        #canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Home Button (Above Canvas) -->
+    <a href="index.html" class="back-button"></a>
+
+    <!-- Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <script>
+      let canvas;
+      let frequencyRectX, frequencyRectY;
+      let delayRectX, delayRectY;
+      let fmRectX, fmRectY;
+      let volY;
+      let audioStarted = false;
+
+      // Tone.js variables (replacing p5.sound variables)
+      let carrier;
+      let modulator;
+      let baseFreq = 440;
+      let modDepth = 0;
+      let modFreq = 20;
+      let pingPongDelay;
+      let delTime = 0.5;
+      let volume;
+
+      // Just intonation pentatonic scale ratios
+      // 1/1, 9/8, 5/4, 3/2, 5/3
+      const justRatios = [1, 9/8, 5/4, 3/2, 5/3];
+      let rootFreq = 55; // A3 as the root
+      let octaveRange = 8; // Number of octaves to span
+      let currentNote = 0;
+      let currentOctave = 0;
+
+      function setup() {
+          pixelDensity(1);
+          canvas = createCanvas(windowWidth * 0.8, windowHeight * 0.8);
+          canvas.parent("canvas-container");
+          rectMode(CENTER);
+          noFill();
+
+          textFont("Futura");
+
+          // Default Values
+          frequencyRectX = width * 0.25;
+          frequencyRectY = height - height * 0.25;
+          delayRectX = width * 0.25;
+          delayRectY = height * 0.25;
+          fmRectX = width * 0.75;
+          fmRectY = height * 0.25;
+          volY = height;
+
+          // Initialize Tone.js instruments and effects
+          setupToneJS();
+      }
+
+      function setupToneJS() {
+          // Create a volume control
+          volume = new Tone.Volume(-60); // Start quiet
+
+          // Initialize FM synth (carrier + modulator)
+          // In Tone.js, we can use FMOscillator which handles FM synthesis more directly
+          carrier = new Tone.FMOscillator({
+              frequency: baseFreq,
+              type: "sine",
+              modulationType: "sine",
+              harmonicity: modFreq / baseFreq,
+              modulationIndex: modDepth
+          }).connect(volume);
+
+          // Create a ping pong delay effect
+          pingPongDelay = new Tone.PingPongDelay({
+              delayTime: delTime,
+              feedback: 0.5,
+              wet: 0.5
+          });
+
+          // Connect signal chain: carrier → delay → master output
+          volume.connect(pingPongDelay);
+          pingPongDelay.toDestination();
+      }
+
+      // Calculate frequency from just intonation
+      function calculateJustFrequency(noteIndex, octaveShift) {
+          // Get the ratio for the note in the scale
+          const ratio = justRatios[noteIndex];
+
+          // Calculate the frequency with octave shift
+          // Each octave doubles the frequency
+          return rootFreq * ratio * Math.pow(2, octaveShift);
+      }
+
+      function draw() {
+          background(255);
+          strokeWeight(2);
+
+          // Simple grid
+          line(width * 0.5, 0, width * 0.5, height);
+          line(0, height * 0.5, width, height * 0.5);
+
+          // Labels for corners
+          push();
+          fill(0);
+          text("delay", 0, 20);
+          text("fm", width - 40, 20);
+          text("freq", 0, height * 0.5 + 20);
+          text("amp", width - 40, height * 0.5 + 20);
+          pop();
+
+          for (let touch of touches) {
+              // Frequency control - now using pentatonic scale
+              if (touch.x < width * 0.5 - 15 && touch.y > height * 0.5 + 15 && touch.x > 15 && touch.y < height - 15) {
+                  frequencyRectX = touch.x;
+                  frequencyRectY = touch.y;
+
+                  // Use X position to select which note in the scale
+                  currentNote = floor(map(frequencyRectX, 15, width * 0.5-15, 0, justRatios.length));
+                  currentNote = constrain(currentNote, 0, justRatios.length - 1);
+
+                  // Use Y position to select which octave
+                  currentOctave = map(frequencyRectY, height-15, height * 0.5+15, 0, octaveRange);
+                  //currentOctave = octaveRange - currentOctave; // Invert so higher positions = higher octaves
+
+                  // Calculate the frequency from the just intonation scale
+                  baseFreq = calculateJustFrequency(currentNote, currentOctave);
+
+                  // Update carrier frequency
+                  carrier.frequency.rampTo(baseFreq, 0.1);
+              }
+
+              // Volume control
+              else if (touch.x > width * 0.5 && touch.y > height * 0.5 && touch.x < width && touch.y < height) {
+                  volY = touch.y;
+                  let vol = map(volY, height, height * 0.5, 0, 1);
+                  // Convert to dB for Tone.js (0 = 0dB, 1 = silence)
+                  let volumeDB = map(vol, 0, 1, -60, 0);
+                  volume.volume.rampTo(volumeDB, 0.1);
+              }
+
+              // FM Modulation control
+              else if (touch.x > width * 0.5 + 15 && touch.y > 15 && touch.x < width - 15 && touch.y < height * 0.5 - 15) {
+                  fmRectX = touch.x;
+                  fmRectY = touch.y;
+
+                  // Map modulation index (depth) based on X position
+                  modDepth = map(fmRectX, width * 0.5+15, width-15, 0, 7);
+                  carrier.modulationIndex.rampTo(modDepth, 0.1);
+
+                  // Map harmonicity (mod frequency ratio) based on Y position
+                  modFreq = map(fmRectY, 15, height * 0.5-15, 100, 1000);
+                  carrier.harmonicity.rampTo(modFreq / baseFreq, 0.1);
+              }
+
+              // delay control
+              else if (touch.x > 15 && touch.x < width*0.5-15 && touch.y > 15 && touch.y < height*0.5-15){
+                delayRectX = touch.x;
+                delayRectY = touch.y;
+
+                delTime = map(delayRectY, 0, height*0.5, 0.01, 1.0);
+                pingPongDelay.delayTime.rampTo(delTime, 0.1);
+
+                // Also control feedback with horizontal position
+                let feedback = map(delayRectX, 0, width*0.5, 0.001, 0.9);
+                pingPongDelay.feedback.rampTo(feedback, 0.5);
+              }
+          }
+
+          // Rect for frequency
+          rect(frequencyRectX, frequencyRectY, 30, 30, 10, 10, 10, 10);
+
+          // Volume "slider"
+          push();
+          noStroke();
+          rectMode(CORNER);
+          fill(220, 210, 200, 200);
+          rect(width * 0.5, volY, width * 0.5, height - volY);
+          pop();
+
+          // Rect for delay
+          rect(delayRectX, delayRectY, 30, 30, 10, 10, 10, 10);
+
+          // Rect for FM
+          rect(fmRectX, fmRectY, 30, 30, 10, 10, 10, 10);
+
+
+      }
+
+      function mousePressed() {
+          if (!audioStarted) {
+              // Start audio context with Tone.js
+              Tone.start().then(() => {
+                  carrier.start();
+                  audioStarted = true;
+                  console.log("Audio started!");
+              }).catch(err => console.log("Error starting audio:", err));
+          }
+      }
+
+      // Handle window resizing
+      function windowResized() {
+          resizeCanvas(windowWidth * 0.8, windowHeight * 0.8);
+      }
+  </script>
+
+</body>
+</html>

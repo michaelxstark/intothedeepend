@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Into the Deep End</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: white;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Futura', sans-serif;
+        }
+
+        canvas {
+            display: block;
+            position: absolute;
+        }
+
+        #prompt-box {
+            display: none;
+            font-size: 1rem;
+            font-weight: normal;
+            text-align: center;
+            max-width: 80%;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            /*cursor: pointer;*/
+        }
+
+        .back-button {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 1);
+            border: 2px solid black;
+            border-radius: 50%;
+            display: block;
+            text-decoration: none;
+        }
+
+    </style>
+
+</head>
+<body>
+
+    <div id="prompt-box"></div>
+
+    <!-- Back Button -->
+    <a href="index.html" class="back-button"></a>
+
+    <script>
+        const prompts = [
+            "Choose a musical style. Improvise. Change the style. Improvise again. What shifts? Now omit the style completely. What changes now?",
+            "Establish a motif. Alter the tempo. What remains? What transforms?",
+            "Find a second player. Improvise until you discover a motif you like. Now establish an accompanying melody. How do you approach it?",
+            "Find a second player. Study counterpoint. Improvise until you establish a motif. Now create an accompanying line that reflects your understanding of counterpoint.",
+            "Study the different parts of the sonata form. Now improvise and try to structure your improvisation accordingly.",
+            "Find several players. Establish a rhythmic foundation. Now one of the players starts developing a motif while the others improvise accompanying material. Is there chaos? How do you deal with it?",
+            "Sit still. Take a deep breath. Now freely improvise for one minute. Where did you start? How did you end?",
+            "Make the instrument sound like it has never sounded before. How did you achieve it? Can you do it again?",
+            "Find a group of players. Now improvise freely together for five minutes. What dynamics can you observe? Who is leading? Is there equality?",
+            "Improvise with another player. Be aware of what they play. At one point, imitate their playing. How did they react?",
+            "Improvise with a group of players. Listen closely. Do you speak the same language?",
+            "Improvise freely for a minute. Reflect on what you have just played. Does it relate to the zeitgeist? And if so, how?",
+            "Improvise in different settings. Reflect on the conditions. When was it effortless? When was it challenging? Can you identify why?",
+            "Make a recording of your improvisation. Listen to it. What did you enjoy more — the process or the product?",
+            "Improvise for a minute. Avoid tonal sounds. Is there still music?",
+            "Go to the instrument. Play a note with a basic sound. Now improvise for a minute by altering only the sonic quality — never the pitch. How do you generate variation?",
+            "Find other players. Each goes to the instrument. Improvise for five minutes. Explore all the sonic possibilities of the instrument. Was there enough space for all ideas?",
+            "Go to the instrument. Make the delay effect audible. Now improvise for a minute and let the echoes guide you. Where did they lead you?",
+            "Improvise on different instruments. How does the interface influence your practice? What hinders? What enhances it?",
+            "Go to the instrument. Improvise for a minute. Was it easy? How would you practice?",
+            "Find one or more partners. Improvise freely for five minutes. Observe your bodies. How did they move? Did they interact? How?",
+            "Go to the instrument. Explore how many sonic sensations you can produce with a single gesture. How does this compare to an acoustic instrument?",
+            "Find a partner. Go to the instrument. Divide the space — one person controls the upper half, the other the lower. Improvise for a minute. What happened?",
+            "Go to the instrument. Adjust only the FM parameter. Discover as many useful sounds as possible. Now improvise using your new repertoire.",
+            "Listen to two improvisations — one acoustic and one electronic. Now go to the instrument and attempt to imitate both. What did you observe?"
+        ];
+
+        class GrowingCircle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+            }
+
+            show(sizer) {
+                circle(this.x, this.y, sizer);
+            }
+        }
+
+        let grower;
+        let growCirc;
+        let showCirc;
+        let pulseGrowth;
+        let showPrompt;
+        let canvas;
+        let firstTime;
+        let promptBox = document.getElementById("prompt-box");
+
+
+        function setup() {
+            pixelDensity(1);
+            canvas = createCanvas(400, 400);
+            canvas.position((windowWidth - width) / 2, (windowHeight - height) / 2); // Center the canvas
+            grower = width * 0.125;
+            growCirc = new GrowingCircle(width / 2, height / 2);
+            showCirc = false;
+            showPrompt = false;
+            pulseGrowth = 0;
+            noFill();
+            firstTime = true;
+        }
+
+        function draw() {
+
+          if (firstTime) {
+              background(255);
+              push();
+              fill(0);
+              textAlign(CENTER);
+              textFont("Futura");
+              textSize(16);
+              text("Click anywhere to draw a prompt", width / 2, height / 2);
+              pop();
+          }
+
+
+            background(255, 30);
+
+            if (showCirc) {
+                growCirc.show(grower);
+                grower += 1;
+            }
+
+
+            if (pulseGrowth > 2) {
+                pulseGrowth = 0;
+                grower = width * 0.125;
+                showCirc = false;
+                showPrompt = true;
+                background(255);
+                displayPrompt(); // Call function to display prompt
+            }
+
+            if (grower >= width * 0.25) {
+                pulseGrowth += 1;
+                grower = width * 0.125;
+            }
+        }
+
+        function mouseClicked() {
+            if (showPrompt) {
+                resetAnimation();
+            } else {
+                pulseGrowth = 0;
+                grower = width * 0.125;
+                showCirc = true;
+            }
+
+            if(firstTime){
+              firstTime = false;
+            }
+        }
+
+        function displayPrompt() {
+            canvas.hide(); // Hide the p5.js canvas
+            let randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+            promptBox.innerText = randomPrompt;
+            promptBox.style.display = "block"; // Show the prompt div
+        }
+
+
+        function resetAnimation() {
+            promptBox.style.display = "none"; // Hide the prompt
+            canvas.show(); // Show the canvas again
+            pulseGrowth = 0;
+            grower = width * 0.125;
+            showCirc = true;
+            showPrompt = true;
+        }
+
+    </script>
+
+</body>
+</html>
