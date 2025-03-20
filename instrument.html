@@ -8,6 +8,7 @@
     <!-- Replace p5.sound with Tone.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/futura-font@1.0.0/styles.min.css">
     <style>
         body {
             /*touch-action: none;*/
@@ -49,6 +50,11 @@
             text-decoration: none;
             margin-top: 5%;
             margin-bottom: 5%; /* Space between button and canvas */
+            /* Add this to make button more tappable */
+            padding: 10px;
+            position: relative;
+            /*box-sizing: content-box;*/
+            z-index: 500;
         }
 
         /* Center Canvas */
@@ -64,19 +70,22 @@
 <body>
 
     <!-- Home Button (Above Canvas) -->
-    <a href="index.html" class="back-button"></a>
+    <a href="index.html" class="back-button" id="backButton"></a>
 
     <!-- Canvas Container -->
     <div id="canvas-container"></div>
 
     <script>
-
-      // Add this to your script
+      // Modified to check if the target is the back button
       function preventBehavior(e) {
+        // Check if the event target is the back button or a child of it
+        if (e.target.id === 'backButton' || e.target.closest('#backButton')) {
+          // Allow default behavior for the back button
+          return true;
+        }
+        // Prevent default for everything else
         e.preventDefault();
       }
-
-
 
       let canvas;
       let frequencyRectX, frequencyRectY;
@@ -103,6 +112,7 @@
       let currentNote = 0;
       let currentOctave = 0;
 
+
       function setup() {
           pixelDensity(1);
           canvas = createCanvas(windowWidth*0.9, windowHeight * 0.8);
@@ -125,10 +135,9 @@
           setupToneJS();
       }
 
-      // Add these event listeners after your setup function
+      // Add these event listeners after your setup function but with passive option set to true
       document.addEventListener('touchmove', preventBehavior, { passive: false });
       document.addEventListener('touchstart', preventBehavior, { passive: false });
-
 
       function setupToneJS() {
           // Create a volume control
@@ -177,6 +186,7 @@
           // Labels for corners
           push();
           fill(0);
+          textFont("Futura"); // Explicitly set Futura for text
           text("delay", 0, 20);
           text("fm", width - 40, 20);
           text("freq", 0, height * 0.5 + 20);
@@ -260,8 +270,6 @@
 
           // Rect for FM
           rect(fmRectX, fmRectY, 30, 30, 10, 10, 10, 10);
-
-
       }
 
       function touchStarted() {
@@ -276,24 +284,17 @@
       }
 
       // Handle window resizing
-      //function windowResized() {
-      //    resizeCanvas(windowWidth * 0.8, windowHeight * 0.8);
-      //}
-
       function windowResized() {
           // Only resize if the window dimensions have actually changed significantly
           // This prevents minor touch-triggered resizing
           if (Math.abs(windowWidth * 0.8 - width) > 10 || Math.abs(windowHeight * 0.8 - height) > 10) {
             resizeCanvas(windowWidth * 0.8, windowHeight * 0.8);
             // Recalculate positions of controls after resize
-            updateControlPositions();
-
+            // Uncomment and implement this function if needed
+            // updateControlPositions();
           }
-
       }
-
-
-  </script>
+    </script>
 
 </body>
 </html>
