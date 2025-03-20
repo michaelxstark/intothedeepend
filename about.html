@@ -22,6 +22,7 @@
             height: 80vh;
             border: none;
         }
+
         .back-button {
             position: fixed; /* Changed from absolute to fixed */
             z-index: 1000; /* Added z-index */
@@ -36,20 +37,13 @@
             text-decoration: none;
         }
 
-        .header-div{
-          margin-bottom: 3%;
-        }
     </style>
 </head>
 <body>
 
-    <div class="header-div">About this project</div>
-
-
     <!-- Full-Screen PDF Display -->
-    <object class="pdf-container" data="About_Page.pdf" type="application/pdf">
-        <p>PDF cannot be displayed. <a href="About_Page.pdf" target="_blank">Click here to view it.</a></p>
-    </object>
+    <a href="About_Page.pdf" target="_blank" class="btn btn-dark">📄 Open Full Tutorial</a>
+
 
     <!-- Back Button -->
     <a href="index.html" class="back-button"></a>
