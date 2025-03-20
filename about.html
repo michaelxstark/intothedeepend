@@ -11,14 +11,14 @@
             font-family: Futura, sans-serif;
             text-align: center;
             padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
-
-        .header-div{
-          margin-bottom: 4%;
-        }
-
         .pdf-container {
-            width: 100%;
+            width: 90%;
             height: 80vh;
             border: none;
         }
@@ -35,14 +35,21 @@
             display: block;
             text-decoration: none;
         }
+
+        .header-div{
+          margin-bottom: 3%;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header-div">About this Project</div>
+    <div class="header-div">About this project</div>
 
-    <!-- Embed the PDF -->
-    <iframe src="About_Page.pdf" class="pdf-container"></iframe>
+
+    <!-- Full-Screen PDF Display -->
+    <object class="pdf-container" data="About_Page.pdf" type="application/pdf">
+        <p>PDF cannot be displayed. <a href="About_Page.pdf" target="_blank">Click here to view it.</a></p>
+    </object>
 
     <!-- Back Button -->
     <a href="index.html" class="back-button"></a>
