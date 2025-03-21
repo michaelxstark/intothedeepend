@@ -11,21 +11,22 @@
 
     <!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/futura-font@1.0.0/styles.min.css">-->
     <style>
-        body {
-            /*touch-action: none;*/
-            overflow: hidden;
-            position: fixed;
-            /*width: 100%;*/
-            /*height: 100%;*/
-            background-color: white;
-            height: 95vh;
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Futura', sans-serif;
+      body {
+          /*touch-action: none;*/
+          overflow: hidden;
+          position: fixed;
+          /*width: 100%;*/
+          /*height: 100%;*/
+          background-color: white;
+          height: 95vh;
+          width: 100vw;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between; /* Change from center to space-between */
+          align-items: center;
+          font-family: 'Futura', sans-serif;
+          padding: 2.5% 0%; /* Add padding top and bottom */
         }
 
         canvas {
@@ -40,23 +41,21 @@
           }
 
 
-        /* Home Button */
-        .back-button {
-            width: 20px;
-            height: 20px;
-            background-color: white;
-            border: 2px solid black;
-            border-radius: 50%;
-            display: block;
-            text-decoration: none;
-            margin-top: 5%;
-            margin-bottom: 5%; /* Space between button and canvas */
-            /* Add this to make button more tappable */
-            padding: 10px;
-            position: relative;
-            /*box-sizing: content-box;*/
-            z-index: 500;
-        }
+          /* back button*/
+          .back-button {
+              width: 20px;
+              height: 20px;
+              background-color: white;
+              border: 2px solid black;
+              border-radius: 50%;
+              display: block;
+              text-decoration: none;
+              margin-top: 2.5vh; /* Use vh units for consistency */
+              margin-bottom: 5vh; /* Use vh units for consistency */
+              padding: 10px;
+              position: relative;
+              z-index: 500;
+          }
 
         /* Center Canvas */
         #canvas-container {
@@ -65,7 +64,10 @@
             align-items: center;
             flex-grow: 1;
             width: 100%;
+            padding-bottom: 5vh; /* Add padding to the bottom instead of margin */
         }
+
+
     </style>
 </head>
 <body>
