@@ -298,15 +298,30 @@
       }
 
       function touchStarted() {
-          if (!audioStarted) {
-              // Start audio context with Tone.js
-              Tone.start().then(() => {
-                  carrier.start();
-                  audioStarted = true;
-                  console.log("Audio started!");
-              }).catch(err => console.log("Error starting audio:", err));
+        if (!audioStarted) {
+            // Start audio context with Tone.js
+            Tone.start().then(() => {
+                carrier.start();
+                audioStarted = true;
+                console.log("Audio started!");
+            }).catch(err => console.log("Error starting audio:", err));
+        }
+
+          if (startScreen){
+            startScreen = false;
           }
-          startScreen = false;
+
+      }
+
+      function mouseClicked(){
+        if (!audioStarted) {
+            // Start audio context with Tone.js
+            Tone.start().then(() => {
+                carrier.start();
+                audioStarted = true;
+                console.log("Audio started!");
+            }).catch(err => console.log("Error starting audio:", err));
+        }
       }
 
       // Handle window resizing
