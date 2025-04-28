@@ -298,31 +298,24 @@
       }
 
       function touchStarted() {
-        if (!audioStarted) {
-            // Start audio context with Tone.js
-            Tone.start().then(() => {
-                carrier.start();
-                audioStarted = true;
-                console.log("Audio started!");
-            }).catch(err => console.log("Error starting audio:", err));
-        }
+          console.log("Touch detected!");
 
-          if (startScreen){
-            startScreen = false;
+          if (startScreen) {
+            startScreen = false; // Hide the start screen
+            
+            // Immediately start the audio
+            Tone.start().then(() => {
+              carrier.start();
+              audioStarted = true;
+              console.log("Audio started!");
+            }).catch(err => console.log("Error starting audio:", err));
+
+            return false; // Prevent default behavior
           }
 
-      }
-
-      function mouseClicked(){
-        if (!audioStarted) {
-            // Start audio context with Tone.js
-            Tone.start().then(() => {
-                carrier.start();
-                audioStarted = true;
-                console.log("Audio started!");
-            }).catch(err => console.log("Error starting audio:", err));
+          return false; // Prevent default behavior
         }
-      }
+
 
       // Handle window resizing
       function windowResized() {
