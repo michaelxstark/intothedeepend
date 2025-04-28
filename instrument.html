@@ -96,6 +96,7 @@
       let fmRectX, fmRectY;
       let volY;
       let audioStarted = false;
+      let startScreen = true;
 
       // Tone.js variables (replacing p5.sound variables)
       let carrier;
@@ -136,9 +137,9 @@
           frequencyRectY = height - height * 0.25;
           delayRectX = width * 0.25;
           delayRectY = height * 0.25;
-          fmRectX = width * 0.5+15;
-          fmRectY = 15;
-          volY = height;
+          fmRectX = width * 0.75;
+          fmRectY = height*0.25;
+          volY = height*0.75;
 
           // Initialize Tone.js instruments and effects
           setupToneJS();
@@ -150,10 +151,10 @@
 
       function setupToneJS() {
           // Create a volume control
-          volume = new Tone.Volume(-60); // Start quiet
+          volume = new Tone.Volume(-40); // Start quiet
 
           // Initialize FM synth (carrier + modulator)
-          // In Tone.js, we can use FMOscillator which handles FM synthesis more directly
+
           carrier = new Tone.FMOscillator({
               frequency: baseFreq,
               type: "sine",
@@ -185,101 +186,115 @@
       }
 
       function draw() {
-          background(255);
-          strokeWeight(2);
-
-          // Simple grid
-          line(width * 0.5, 0, width * 0.5, height);
-          line(0, height * 0.5, width, height * 0.5);
-
-          // Labels for corners
-          push();
-          fill(0);
-          textSize(16);
-          //textFont("Futura"); // Explicitly set Futura for text
-          text("delay", 0, 20);
-          text("fm", width - 40, 20);
-          text("freq", 0, height * 0.5 + 20);
-          text("amp", width - 40, height * 0.5 + 20);
-          pop();
-
-          for (let touch of touches) {
-              // Frequency control - now using pentatonic scale
-              if (touch.x < width * 0.5 - 15 && touch.y > height * 0.5 + 15 && touch.x > 15 && touch.y < height - 15) {
-                  frequencyRectX = touch.x;
-                  frequencyRectY = touch.y;
-
-                  // Use X position to select which note in the scale
-                  currentNote = floor(map(frequencyRectX, 15, width * 0.5-15, 0, justRatios.length));
-                  currentNote = constrain(currentNote, 0, justRatios.length - 1);
-
-                  // Use Y position to select which octave
-                  currentOctave = map(frequencyRectY, height-15, height * 0.5+15, 0, octaveRange);
-                  //currentOctave = octaveRange - currentOctave; // Invert so higher positions = higher octaves
-
-                  // Calculate the frequency from the just intonation scale
-                  baseFreq = calculateJustFrequency(currentNote, currentOctave);
-
-                  // Update carrier frequency
-                  carrier.frequency.rampTo(baseFreq, 0.02);
-              }
-
-              // Volume control
-              else if (touch.x > width * 0.5 && touch.y > height * 0.5 && touch.x < width && touch.y < height) {
-                  volY = touch.y;
-                  let vol = map(volY, height, height * 0.5, 0, 1);
-                  // Convert to dB for Tone.js (0 = 0dB, 1 = silence)
-                  let volumeDB = map(vol, 0, 1, -80, 0);
-                  volume.volume.rampTo(volumeDB, 0.02);
-              }
-
-              // FM Modulation control
-              else if (touch.x > width * 0.5 + 15 && touch.y > 15 && touch.x < width - 15 && touch.y < height * 0.5 - 15) {
-                  fmRectX = touch.x;
-                  fmRectY = touch.y;
-
-                  // Map modulation index (depth) based on X position
-                  modDepth = map(fmRectX, width * 0.5+15, width-15, 0, 7);
-                  carrier.modulationIndex.rampTo(modDepth, 0.1);
-
-                  // Map harmonicity (mod frequency ratio) based on Y position
-                  modFreq = Math.floor(map(fmRectY, 15, height * 0.5-15, 1, 10));
-                  carrier.harmonicity.rampTo(modFreq, 0.1);
-              }
-
-              // delay control
-              else if (touch.x > 15 && touch.x < width*0.5-15 && touch.y > 15 && touch.y < height*0.5-15){
-                delayRectX = touch.x;
-                delayRectY = touch.y;
-
-                delTime = map(delayRectY, 0, height*0.5, 0.0, 1.0);
-                pingPongDelay.delayTime.rampTo(delTime, 0.1);
-
-
-                // Control feedback and Dry/Wet with horizontal position
-                let feedbck = map(delayRectX, 0, width*0.5, 0.001, 0.95);
-                let dryWet = map(delayRectX, 0, width*0.5, 0.001, 0.9);
-                pingPongDelay.feedback.rampTo(feedbck, 0.05);
-                pingPongDelay.wet.rampTo(dryWet, 0.05);
-              }
+          if(startScreen){
+            background(255);
+            push();
+            fill(0);
+            textSize(16);
+            textAlign(CENTER);
+            text("Set device to loud", width*0.5, height*0.45);
+            text("Click anywhere to start the audio", width*0.5, height*0.5);
+            text("Start exploring the instument", width*0.5, height*0.55);
+            pop();
           }
 
-          // Rect for frequency
-          rect(frequencyRectX, frequencyRectY, 30, 30, 10, 10, 10, 10);
+          else{
+            background(255);
+            strokeWeight(2);
 
-          // Volume "slider"
-          push();
-          noStroke();
-          rectMode(CORNER);
-          fill(220, 210, 210, 200);
-          rect(width * 0.5, volY, width * 0.5, height - volY);
-          pop();
+            // Simple grid
+            line(width * 0.5, 0, width * 0.5, height);
+            line(0, height * 0.5, width, height * 0.5);
 
-          // Rect for delay
-          rect(delayRectX, delayRectY, 30, 30, 10, 10, 10, 10);
+            // Labels for corners
+            push();
+            fill(0);
+            textSize(16);
+            //textFont("Futura"); // Explicitly set Futura for text
+            text("delay", 0, 20);
+            text("fm", width - 40, 20);
+            text("freq", 0, height * 0.5 + 20);
+            text("amp", width - 40, height * 0.5 + 20);
+            pop();
 
-          // Rect for FM
-          rect(fmRectX, fmRectY, 30, 30, 10, 10, 10, 10);
+            for (let touch of touches) {
+                // Frequency control - now using pentatonic scale
+                if (touch.x < width * 0.5 - 15 && touch.y > height * 0.5 + 15 && touch.x > 15 && touch.y < height - 15) {
+                    frequencyRectX = touch.x;
+                    frequencyRectY = touch.y;
+
+                    // Use X position to select which note in the scale
+                    currentNote = floor(map(frequencyRectX, 15, width * 0.5-15, 0, justRatios.length));
+                    currentNote = constrain(currentNote, 0, justRatios.length - 1);
+
+                    // Use Y position to select which octave
+                    currentOctave = map(frequencyRectY, height-15, height * 0.5+15, 0, octaveRange);
+                    //currentOctave = octaveRange - currentOctave; // Invert so higher positions = higher octaves
+
+                    // Calculate the frequency from the just intonation scale
+                    baseFreq = calculateJustFrequency(currentNote, currentOctave);
+
+                    // Update carrier frequency
+                    carrier.frequency.rampTo(baseFreq, 0.02);
+                }
+
+                // Volume control
+                else if (touch.x > width * 0.5 && touch.y > height * 0.5 && touch.x < width && touch.y < height) {
+                    volY = touch.y;
+                    let vol = map(volY, height, height * 0.5, 0, 1);
+                    // Convert to dB for Tone.js (0 = 0dB, 1 = silence)
+                    let volumeDB = map(vol, 0, 1, -80, 0);
+                    volume.volume.rampTo(volumeDB, 0.02);
+                }
+
+                // FM Modulation control
+                else if (touch.x > width * 0.5 + 15 && touch.y > 15 && touch.x < width - 15 && touch.y < height * 0.5 - 15) {
+                    fmRectX = touch.x;
+                    fmRectY = touch.y;
+
+                    // Map modulation index (depth) based on X position
+                    modDepth = map(fmRectX, width * 0.5+15, width-15, 0, 7);
+                    carrier.modulationIndex.rampTo(modDepth, 0.1);
+
+                    // Map harmonicity (mod frequency ratio) based on Y position
+                    modFreq = Math.floor(map(fmRectY, 15, height * 0.5-15, 1, 10));
+                    carrier.harmonicity.rampTo(modFreq, 0.1);
+                }
+
+                // delay control
+                else if (touch.x > 15 && touch.x < width*0.5-15 && touch.y > 15 && touch.y < height*0.5-15){
+                  delayRectX = touch.x;
+                  delayRectY = touch.y;
+
+                  delTime = map(delayRectY, 0, height*0.5, 0.0, 1.0);
+                  pingPongDelay.delayTime.rampTo(delTime, 0.1);
+
+
+                  // Control feedback and Dry/Wet with horizontal position
+                  let feedbck = map(delayRectX, 0, width*0.5, 0.001, 0.95);
+                  let dryWet = map(delayRectX, 0, width*0.5, 0.001, 0.9);
+                  pingPongDelay.feedback.rampTo(feedbck, 0.05);
+                  pingPongDelay.wet.rampTo(dryWet, 0.05);
+                }
+            }
+
+            // Rect for frequency
+            rect(frequencyRectX, frequencyRectY, 30, 30, 10, 10, 10, 10);
+
+            // Volume "slider"
+            push();
+            noStroke();
+            rectMode(CORNER);
+            fill(220, 210, 210, 200);
+            rect(width * 0.5, volY, width * 0.5, height - volY);
+            pop();
+
+            // Rect for delay
+            rect(delayRectX, delayRectY, 30, 30, 10, 10, 10, 10);
+
+            // Rect for FM
+            rect(fmRectX, fmRectY, 30, 30, 10, 10, 10, 10);
+          }
       }
 
       function touchStarted() {
@@ -291,6 +306,7 @@
                   console.log("Audio started!");
               }).catch(err => console.log("Error starting audio:", err));
           }
+          startScreen = false;
       }
 
       // Handle window resizing
