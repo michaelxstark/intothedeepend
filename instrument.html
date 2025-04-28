@@ -298,23 +298,20 @@
       }
 
       function touchStarted() {
-          console.log("Touch detected!");
-
-          if (startScreen) {
-            startScreen = false; // Hide the start screen
-            
-            // Immediately start the audio
+        if (!audioStarted) {
+            // Start audio context with Tone.js
             Tone.start().then(() => {
-              carrier.start();
-              audioStarted = true;
-              console.log("Audio started!");
+                carrier.start();
+                audioStarted = true;
+                console.log("Audio started!");
             }).catch(err => console.log("Error starting audio:", err));
-
-            return false; // Prevent default behavior
-          }
-
-          return false; // Prevent default behavior
         }
+
+        if (startScreen){
+          startScreen = false;
+        }
+
+      }
 
 
       // Handle window resizing
