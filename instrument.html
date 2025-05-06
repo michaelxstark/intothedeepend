@@ -73,7 +73,7 @@
 <body>
 
     <!-- Home Button (Above Canvas) -->
-    <a href="index.html" class="back-button" id="backButton"></a>
+    <a href="index.html" class="back-button" id="backButton" onclick="audioFade()"></a>
 
     <!-- Canvas Container -->
     <div id="canvas-container"></div>
@@ -102,8 +102,8 @@
       let carrier;
       let modulator;
       let baseFreq = 440;
-      let modDepth = 0;
-      let modFreq = 20;
+      let modDepth = 3;
+      let modFreq = 5;
       let pingPongDelay;
       let delTime = 0.5;
       let volume;
@@ -151,7 +151,7 @@
 
       function setupToneJS() {
           // Create a volume control
-          volume = new Tone.Volume(-40); // Start quiet
+          volume = new Tone.Volume(-80); // Start low
 
           // Initialize FM synth (carrier + modulator)
 
@@ -159,7 +159,7 @@
               frequency: baseFreq,
               type: "sine",
               modulationType: "sine",
-              harmonicity: 0,
+              harmonicity: 3,
               modulationIndex: modDepth
           }).connect(volume);
 
@@ -302,6 +302,7 @@
             // Start audio context with Tone.js
             Tone.start().then(() => {
                 carrier.start();
+                volume.volume.rampTo(-30, 0.1);
                 audioStarted = true;
                 console.log("Audio started!");
             }).catch(err => console.log("Error starting audio:", err));
@@ -313,7 +314,9 @@
 
       }
 
-
+      function audioFade(){
+        volume.volume.rampTo(-100, 0.1);
+      }
       // Handle window resizing
       function windowResized() {
           // Only resize if the window dimensions have actually changed significantly
